@@ -8,17 +8,16 @@ const AssetManager = {
     loader: null,
     dracoLoader: null,
     loadedModels: {},
-    // CDN-hosted models from KhronosGroup glTF-Sample-Assets (CC0/CC-BY)
+    // Local model paths (downloaded from KhronosGroup glTF-Sample-Assets)
     modelPaths: {
-        // Direct CDN links - no download needed!
-        chair: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SheenChair/glTF-Binary/SheenChair.glb',
-        plant: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DiffuseTransmissionPlant/glTF-Binary/DiffuseTransmissionPlant.glb',
-        teacup: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DiffuseTransmissionTeacup/glTF-Binary/DiffuseTransmissionTeacup.glb',
-        character: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/RiggedFigure/glTF-Binary/RiggedFigure.glb',
-        // Local paths (for downloaded models)
+        // Local files - works with file:// protocol
+        chair: 'assets/models/chair.glb',
+        plant: 'assets/models/plant.glb',
+        teacup: 'assets/models/teacup.glb',
+        character: 'assets/models/character.glb',
+        // Additional local paths (for user-added models)
         cafe: null,
         espressoMachine: null,
-        coffeeCup: null,
         table: null,
         tree: null,
         pastry: null,
