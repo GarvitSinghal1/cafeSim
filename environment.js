@@ -151,93 +151,337 @@ function createGround(scene) {
 }
 
 // ============================================
-// MODERN COMPACT CAFÉ
+// MODERN COMPACT CAFÉ - PROPER WALLS
 // ============================================
 function createCafe(scene) {
     const cafeGroup = new THREE.Group();
 
-    // Materials
-    const wallMat = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, roughness: 0.8 });
+    // Materials - double sided for interior visibility
+    const wallMat = new THREE.MeshStandardMaterial({
+        color: 0x2a2a2a,
+        roughness: 0.8,
+        side: THREE.DoubleSide
+    });
+    const interiorWallMat = new THREE.MeshStandardMaterial({
+        color: 0x3d3d3d,
+        roughness: 0.7,
+        side: THREE.DoubleSide
+    });
     const glassMat = new THREE.MeshStandardMaterial({
         color: 0x88ccff,
         transparent: true,
         opacity: 0.3,
         metalness: 0.9,
-        roughness: 0.1
+        roughness: 0.1,
+        side: THREE.DoubleSide
     });
     const woodMat = new THREE.MeshStandardMaterial({ color: 0x5a4535, roughness: 0.7 });
     const accentMat = new THREE.MeshStandardMaterial({ color: 0xff6b35, metalness: 0.3 });
+    const roofMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.6 });
+    const brickMat = new THREE.MeshStandardMaterial({ color: 0x8b4513, roughness: 0.9 });
 
-    // Main building - compact box
-    const building = new THREE.Mesh(
-        new THREE.BoxGeometry(8, 3.5, 5),
-        wallMat
-    );
-    building.position.set(0, 1.75, -4);
-    building.castShadow = true;
-    building.receiveShadow = true;
-    cafeGroup.add(building);
-
-    // Large front window
-    const frontWindow = new THREE.Mesh(
-        new THREE.PlaneGeometry(5, 2.5),
-        glassMat
-    );
-    frontWindow.position.set(0, 2, -1.49);
-    cafeGroup.add(frontWindow);
-
-    // Orange accent stripe on building
-    const accent = new THREE.Mesh(
-        new THREE.BoxGeometry(8.1, 0.2, 5.1),
-        accentMat
-    );
-    accent.position.set(0, 3.55, -4);
-    cafeGroup.add(accent);
-
-    // Door frame
-    const doorFrame = new THREE.Mesh(
-        new THREE.BoxGeometry(1.2, 2.5, 0.1),
-        woodMat
-    );
-    doorFrame.position.set(-2.5, 1.25, -1.49);
-    cafeGroup.add(doorFrame);
-
-    // Floor inside
+    // Floor
     const floor = new THREE.Mesh(
-        new THREE.BoxGeometry(7.8, 0.1, 4.8),
-        new THREE.MeshStandardMaterial({ color: 0x4a4a4a })
+        new THREE.BoxGeometry(8, 0.15, 5),
+        new THREE.MeshStandardMaterial({ color: 0x4a4540, roughness: 0.8 })
     );
-    floor.position.set(0, 0.05, -4);
+    floor.position.set(0, 0.075, -4);
     floor.receiveShadow = true;
     cafeGroup.add(floor);
 
+    // Back wall (interior visible)
+    const backWall = new THREE.Mesh(
+        new THREE.BoxGeometry(8, 3.5, 0.2),
+        interiorWallMat
+    );
+    backWall.position.set(0, 1.75, -6.4);
+    backWall.castShadow = true;
+    cafeGroup.add(backWall);
+
+    // Left wall (solid)
+    const leftWall = new THREE.Mesh(
+        new THREE.BoxGeometry(0.2, 3.5, 5),
+        wallMat
+    );
+    leftWall.position.set(-3.9, 1.75, -4);
+    leftWall.castShadow = true;
+    cafeGroup.add(leftWall);
+
+    // Right wall (solid)
+    const rightWall = new THREE.Mesh(
+        new THREE.BoxGeometry(0.2, 3.5, 5),
+        wallMat
+    );
+    rightWall.position.set(3.9, 1.75, -4);
+    rightWall.castShadow = true;
+    cafeGroup.add(rightWall);
+
+    // Front wall - left section (with door hole)
+    const frontWallLeft = new THREE.Mesh(
+        new THREE.BoxGeometry(1.2, 3.5, 0.2),
+        wallMat
+    );
+    frontWallLeft.position.set(-3.2, 1.75, -1.5);
+    cafeGroup.add(frontWallLeft);
+
+    // Front wall - right section
+    const frontWallRight = new THREE.Mesh(
+        new THREE.BoxGeometry(1.2, 3.5, 0.2),
+        wallMat
+    );
+    frontWallRight.position.set(3.2, 1.75, -1.5);
+    cafeGroup.add(frontWallRight);
+
+    // Front wall - above window
+    const frontWallTop = new THREE.Mesh(
+        new THREE.BoxGeometry(5.2, 0.8, 0.2),
+        wallMat
+    );
+    frontWallTop.position.set(0, 3.1, -1.5);
+    cafeGroup.add(frontWallTop);
+
+    // Front wall - below window
+    const frontWallBottom = new THREE.Mesh(
+        new THREE.BoxGeometry(5.2, 0.5, 0.2),
+        wallMat
+    );
+    frontWallBottom.position.set(0, 0.25, -1.5);
+    cafeGroup.add(frontWallBottom);
+
+    // Large front window
+    const frontWindow = new THREE.Mesh(
+        new THREE.PlaneGeometry(5, 2.2),
+        glassMat
+    );
+    frontWindow.position.set(0, 1.8, -1.49);
+    cafeGroup.add(frontWindow);
+
+    // Window frame
+    const windowFrame = new THREE.Mesh(
+        new THREE.BoxGeometry(5.2, 0.08, 0.1),
+        woodMat
+    );
+    windowFrame.position.set(0, 2.9, -1.45);
+    cafeGroup.add(windowFrame);
+
+    // Roof
+    const roof = new THREE.Mesh(
+        new THREE.BoxGeometry(8.4, 0.3, 5.4),
+        roofMat
+    );
+    roof.position.set(0, 3.65, -4);
+    roof.castShadow = true;
+    cafeGroup.add(roof);
+
+    // Orange accent stripe
+    const accent = new THREE.Mesh(
+        new THREE.BoxGeometry(8.5, 0.15, 5.5),
+        accentMat
+    );
+    accent.position.set(0, 3.45, -4);
+    cafeGroup.add(accent);
+
+    // Awning over entrance
+    const awning = new THREE.Mesh(
+        new THREE.BoxGeometry(3, 0.1, 1.5),
+        accentMat
+    );
+    awning.position.set(-2, 2.8, -0.9);
+    cafeGroup.add(awning);
+
+    // Door frame
+    const doorFrame = new THREE.Mesh(
+        new THREE.BoxGeometry(1.1, 2.3, 0.15),
+        woodMat
+    );
+    doorFrame.position.set(-2.5, 1.15, -1.45);
+    cafeGroup.add(doorFrame);
+
     // Counter
     const counter = createCounter();
-    counter.position.set(0, 0, -5.5);
+    counter.position.set(0, 0, -5.2);
     cafeGroup.add(counter);
+
+    // Decorative elements outside
+    // Planters
+    const planterMat = new THREE.MeshStandardMaterial({ color: 0x5a4535 });
+    const plantMat = new THREE.MeshStandardMaterial({ color: 0x2d5a27 });
+
+    [-3, 3].forEach(x => {
+        const planter = new THREE.Mesh(
+            new THREE.BoxGeometry(0.5, 0.4, 0.5),
+            planterMat
+        );
+        planter.position.set(x, 0.2, -1);
+        cafeGroup.add(planter);
+
+        const plant = new THREE.Mesh(
+            new THREE.SphereGeometry(0.3, 8, 8),
+            plantMat
+        );
+        plant.position.set(x, 0.55, -1);
+        cafeGroup.add(plant);
+    });
 
     // Sign
     const signGroup = new THREE.Group();
     const signBoard = new THREE.Mesh(
-        new THREE.BoxGeometry(3, 0.8, 0.1),
+        new THREE.BoxGeometry(2.5, 0.7, 0.08),
         new THREE.MeshStandardMaterial({ color: 0x1a1a1a })
     );
     signGroup.add(signBoard);
 
-    // Orange text background
     const signText = new THREE.Mesh(
-        new THREE.BoxGeometry(2.5, 0.5, 0.05),
+        new THREE.BoxGeometry(2.2, 0.45, 0.05),
         accentMat
     );
-    signText.position.z = 0.08;
+    signText.position.z = 0.07;
     signGroup.add(signText);
 
-    signGroup.position.set(0, 4.2, -1.5);
+    signGroup.position.set(0, 4.1, -1.3);
     cafeGroup.add(signGroup);
 
     scene.add(cafeGroup);
 
+    // Add neighborhood buildings
+    createNeighborhood(scene);
+
     return cafeGroup;
+}
+
+// ============================================
+// NEIGHBORHOOD BUILDINGS
+// ============================================
+function createNeighborhood(scene) {
+    // Left building - Bookshop
+    const bookshop = createBuilding({
+        width: 6, height: 4.5, depth: 5,
+        wallColor: 0x6b4423,
+        roofColor: 0x3d2817,
+        windowColor: 0xffe4b5,
+        hasAwning: true,
+        awningColor: 0x2d5a27
+    });
+    bookshop.position.set(-8, 0, -4);
+    scene.add(bookshop);
+
+    // Right building - Bakery
+    const bakery = createBuilding({
+        width: 5, height: 4, depth: 5,
+        wallColor: 0xf5e6d3,
+        roofColor: 0x8b4513,
+        windowColor: 0xfff8dc,
+        hasAwning: true,
+        awningColor: 0xdc143c
+    });
+    bakery.position.set(7.5, 0, -4);
+    scene.add(bakery);
+
+    // Far left - Apartment
+    const apartment = createBuilding({
+        width: 5, height: 8, depth: 6,
+        wallColor: 0x8b8b8b,
+        roofColor: 0x4a4a4a,
+        windowColor: 0x87ceeb,
+        floors: 3
+    });
+    apartment.position.set(-14, 0, -5);
+    scene.add(apartment);
+
+    // Far right - House
+    const house = createBuilding({
+        width: 4, height: 3.5, depth: 4,
+        wallColor: 0xdeb887,
+        roofColor: 0x8b4513,
+        windowColor: 0xfffacd,
+        hasChimney: true
+    });
+    house.position.set(13, 0, -3);
+    scene.add(house);
+}
+
+function createBuilding(options) {
+    const group = new THREE.Group();
+
+    const {
+        width = 5,
+        height = 4,
+        depth = 5,
+        wallColor = 0x888888,
+        roofColor = 0x444444,
+        windowColor = 0xadd8e6,
+        hasAwning = false,
+        awningColor = 0xff6b35,
+        floors = 1,
+        hasChimney = false
+    } = options;
+
+    const wallMat = new THREE.MeshStandardMaterial({ color: wallColor, roughness: 0.8 });
+    const roofMat = new THREE.MeshStandardMaterial({ color: roofColor, roughness: 0.7 });
+    const windowMat = new THREE.MeshStandardMaterial({
+        color: windowColor,
+        transparent: true,
+        opacity: 0.6
+    });
+
+    // Main building
+    const body = new THREE.Mesh(
+        new THREE.BoxGeometry(width, height, depth),
+        wallMat
+    );
+    body.position.y = height / 2;
+    body.castShadow = true;
+    body.receiveShadow = true;
+    group.add(body);
+
+    // Roof
+    const roof = new THREE.Mesh(
+        new THREE.BoxGeometry(width + 0.3, 0.2, depth + 0.3),
+        roofMat
+    );
+    roof.position.y = height + 0.1;
+    group.add(roof);
+
+    // Windows
+    const windowsPerFloor = Math.floor(width / 1.5);
+    const floorHeight = height / floors;
+
+    for (let f = 0; f < floors; f++) {
+        for (let w = 0; w < windowsPerFloor; w++) {
+            const win = new THREE.Mesh(
+                new THREE.PlaneGeometry(0.6, 0.8),
+                windowMat
+            );
+            win.position.set(
+                -width / 2 + 1 + w * 1.4,
+                floorHeight * (f + 0.6),
+                depth / 2 + 0.01
+            );
+            group.add(win);
+        }
+    }
+
+    // Awning
+    if (hasAwning) {
+        const awning = new THREE.Mesh(
+            new THREE.BoxGeometry(width * 0.8, 0.1, 1),
+            new THREE.MeshStandardMaterial({ color: awningColor })
+        );
+        awning.position.set(0, 2.5, depth / 2 + 0.5);
+        group.add(awning);
+    }
+
+    // Chimney
+    if (hasChimney) {
+        const chimney = new THREE.Mesh(
+            new THREE.BoxGeometry(0.5, 1, 0.5),
+            roofMat
+        );
+        chimney.position.set(width / 4, height + 0.5, 0);
+        group.add(chimney);
+    }
+
+    return group;
 }
 
 function createCounter() {

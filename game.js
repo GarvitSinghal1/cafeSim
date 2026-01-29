@@ -80,6 +80,11 @@ async function init() {
     // Create falling leaves
     fallingLeaves = createFallingLeaves(scene);
 
+    // Initialize physics
+    if (typeof initPhysics === 'function') {
+        initPhysics();
+    }
+
     updateLoadingProgress(60);
 
     // Collect interactable objects
@@ -290,6 +295,11 @@ function animate() {
         updateCustomers(delta);
         updateFallingLeaves(fallingLeaves, delta);
         checkInteractionPrompt();
+
+        // Update physics
+        if (typeof updatePhysics === 'function') {
+            updatePhysics(delta);
+        }
     }
 
     updateMiniGame();
@@ -519,11 +529,46 @@ function grabPastry() {
 function dropItem() {
     if (!physicsState.grabbedObject) return;
 
-    scene.remove(physicsState.grabbedObject);
+    const obj = physicsState.grabbedObject;
+
+    // If we have real physics, throw it
+    if (typeof throwObject === 'function' && obj.userData.physicsBody) {
+        throwObject(obj, camera, 8);
+    } else {
+        // Fallback: place object on ground in front of player
+        const forward = new THREE.Vector3();
+        camera.getWorldDirection(forward);
+        obj.position.copy(camera.position).add(forward.multiplyScalar(1.5));
+        obj.position.y = 0.1;
+    }
+
     physicsState.grabbedObject = null;
     physicsState.isGrabbing = false;
-
     playSound('drop');
+}
+
+// Throw object with physics
+function throwItem() {
+    if (!physicsState.grabbedObject) return;
+
+    const obj = physicsState.grabbedObject;
+
+    if (typeof throwObject === 'function') {
+        // Create physics body if needed
+        if (!obj.userData.physicsBody && typeof createPhysicsCup === 'function') {
+            if (obj.userData.itemType === 'cup') {
+                createPhysicsCup(obj);
+            } else if (obj.userData.itemType === 'pastry') {
+                createPhysicsPastry(obj);
+            }
+        }
+
+        throwObject(obj, camera, 10);
+    }
+
+    physicsState.grabbedObject = null;
+    physicsState.isGrabbing = false;
+    playSound('throw');
 }
 
 function trashItem() {
@@ -738,24 +783,71 @@ function spawnCustomer() {
 
 function createCustomerNPC(color) {
     const group = new THREE.Group();
+    const skinColor = 0xf5d0c5;
+    const skinMat = new THREE.MeshStandardMaterial({ color: skinColor });
+    const clothesMat = new THREE.MeshStandardMaterial({ color: color });
 
-    // Body
-    const bodyMat = new THREE.MeshStandardMaterial({ color: color });
-    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.25, 1, 8), bodyMat);
-    body.position.y = 0.5;
-    group.add(body);
+    // Legs
+    const legMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+    [-0.08, 0.08].forEach(x => {
+        const leg = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.06, 0.06, 0.5, 8),
+            legMat
+        );
+        leg.position.set(x, 0.25, 0);
+        group.add(leg);
+    });
+
+    // Torso
+    const torso = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.18, 0.22, 0.55, 12),
+        clothesMat
+    );
+    torso.position.y = 0.75;
+    group.add(torso);
+
+    // Arms
+    [-0.25, 0.25].forEach(x => {
+        const arm = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.04, 0.05, 0.4, 8),
+            skinMat
+        );
+        arm.position.set(x, 0.7, 0);
+        arm.rotation.z = x > 0 ? 0.3 : -0.3;
+        group.add(arm);
+    });
 
     // Head
     const head = new THREE.Mesh(
-        new THREE.SphereGeometry(0.18, 12, 12),
-        new THREE.MeshStandardMaterial({ color: 0xf5d0c5 })
+        new THREE.SphereGeometry(0.15, 16, 16),
+        skinMat
     );
     head.position.y = 1.2;
     group.add(head);
 
-    // Order bubble (shows above head)
-    const orderBubble = createOrderBubble();
-    orderBubble.position.y = 1.6;
+    // Hair
+    const hairColors = [0x2b1a0f, 0x5a3d1e, 0x8b4513, 0x333333, 0xdaa520];
+    const hairColor = hairColors[Math.floor(Math.random() * hairColors.length)];
+    const hair = new THREE.Mesh(
+        new THREE.SphereGeometry(0.16, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2),
+        new THREE.MeshStandardMaterial({ color: hairColor })
+    );
+    hair.position.y = 1.25;
+    group.add(hair);
+
+    // Eyes
+    [-0.05, 0.05].forEach(x => {
+        const eye = new THREE.Mesh(
+            new THREE.SphereGeometry(0.02, 8, 8),
+            new THREE.MeshBasicMaterial({ color: 0x111111 })
+        );
+        eye.position.set(x, 1.22, 0.13);
+        group.add(eye);
+    });
+
+    // Order bubble (empty placeholder - will be updated when order is set)
+    const orderBubble = new THREE.Group();
+    orderBubble.position.y = 1.65;
     orderBubble.name = 'orderBubble';
     orderBubble.visible = false;
     group.add(orderBubble);
@@ -763,20 +855,68 @@ function createCustomerNPC(color) {
     return group;
 }
 
-function createOrderBubble() {
+function createOrderBubble(orderItems) {
     const group = new THREE.Group();
 
-    // Background bubble
-    const bubble = new THREE.Mesh(
-        new THREE.PlaneGeometry(0.6, 0.3),
-        new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9 })
-    );
-    group.add(bubble);
+    // Create canvas for text
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
 
-    // This will be updated with order icons
-    group.userData = { orderText: '' };
+    // Draw bubble background
+    ctx.fillStyle = 'white';
+    ctx.beginPath();
+    ctx.roundRect(5, 5, 246, 118, 15);
+    ctx.fill();
+
+    ctx.strokeStyle = '#ff6b35';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // Draw order text
+    ctx.fillStyle = '#333';
+    ctx.font = 'bold 20px Arial';
+    ctx.textAlign = 'center';
+
+    if (orderItems && orderItems.length > 0) {
+        const text = orderItems.map(item => item.icon + ' ' + item.name).join('\n');
+        const lines = text.split('\n');
+        lines.forEach((line, i) => {
+            ctx.fillText(line, 128, 40 + i * 35, 230);
+        });
+    }
+
+    // Create texture
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+
+    // Create sprite/plane
+    const material = new THREE.SpriteMaterial({
+        map: texture,
+        transparent: true
+    });
+    const sprite = new THREE.Sprite(material);
+    sprite.scale.set(0.8, 0.4, 1);
+    group.add(sprite);
 
     return group;
+}
+
+function updateOrderBubble(customer) {
+    // Remove old bubble
+    const oldBubble = customer.getObjectByName('orderBubble');
+    if (oldBubble) {
+        customer.remove(oldBubble);
+    }
+
+    // Create new bubble with order text
+    const orderItems = customer.userData.order;
+    const newBubble = createOrderBubble(orderItems);
+    newBubble.position.y = 1.65;
+    newBubble.name = 'orderBubble';
+    newBubble.visible = true;
+    customer.add(newBubble);
 }
 
 function generateOrder() {
@@ -817,9 +957,8 @@ function animateCustomerEnter(customer) {
             customer.userData.state = 'waiting';
             customer.rotation.y = Math.PI; // Face counter
 
-            // Show order bubble
-            const bubble = customer.getObjectByName('orderBubble');
-            if (bubble) bubble.visible = true;
+            // Show order bubble with actual order text
+            updateOrderBubble(customer);
 
             // Add to active orders
             addOrder(customer);
