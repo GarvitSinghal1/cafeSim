@@ -1,0 +1,897 @@
+/* 
+ * CaféVibe - Modern Coffee Shop Game
+ * Clean, modern design with subtle autumn accents
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* ==========================================
+   CSS Variables - Modern Clean Palette
+   ========================================== */
+:root {
+    /* Primary Colors - Cool & Modern */
+    --bg-dark: #0f0f0f;
+    --bg-medium: #1a1a1a;
+    --bg-light: #2a2a2a;
+    
+    /* Text Colors */
+    --text-primary: #ffffff;
+    --text-secondary: #b0b0b0;
+    --text-muted: #666666;
+    
+    /* Accent Colors - Autumn Orange (used sparingly) */
+    --accent-primary: #ff6b35;
+    --accent-secondary: #f7931e;
+    --accent-glow: rgba(255, 107, 53, 0.3);
+    
+    /* UI Colors */
+    --success: #00d26a;
+    --warning: #ffcc00;
+    --error: #ff4444;
+    --info: #00b4d8;
+    
+    /* Glass Effect */
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+/* ==========================================
+   Base Styles
+   ========================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    overflow: hidden;
+    line-height: 1.6;
+}
+
+/* ==========================================
+   Game Container
+   ========================================== */
+#game-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* ==========================================
+   Main Menu / Blocker
+   ========================================== */
+#blocker {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1a2e 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.menu-container {
+    text-align: center;
+    max-width: 600px;
+    padding: 40px;
+}
+
+.game-title {
+    font-size: 4em;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 0 30px var(--accent-glow));
+}
+
+.game-subtitle {
+    font-size: 1.1em;
+    color: var(--text-secondary);
+    margin-bottom: 40px;
+    font-weight: 300;
+}
+
+/* ==========================================
+   Mode Buttons
+   ========================================== */
+.mode-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.mode-btn {
+    padding: 20px 35px;
+    border: none;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 1.1em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 180px;
+    position: relative;
+    overflow: hidden;
+}
+
+.mode-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.mode-btn:hover::before {
+    left: 100%;
+}
+
+.mode-btn.cozy {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.mode-btn.competitive {
+    background: linear-gradient(135deg, #f093fb, #f5576c);
+    color: white;
+}
+
+.mode-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.mode-description {
+    font-size: 0.85em;
+    color: var(--text-muted);
+    margin-top: 5px;
+}
+
+/* ==========================================
+   Loading Screen
+   ========================================== */
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-dark);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+}
+
+.loading-text {
+    font-size: 1.5em;
+    margin-bottom: 30px;
+    color: var(--text-secondary);
+}
+
+.loading-bar-container {
+    width: 300px;
+    height: 6px;
+    background: var(--bg-light);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.loading-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+    width: 0%;
+    transition: width 0.3s ease;
+    border-radius: 3px;
+}
+
+/* ==========================================
+   HUD (Heads Up Display)
+   ========================================== */
+#hud {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 50;
+    display: none;
+}
+
+.hud-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 20px;
+    min-width: 200px;
+    box-shadow: var(--shadow-md);
+}
+
+.hud-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    font-size: 1.1em;
+}
+
+.hud-item:last-child {
+    margin-bottom: 0;
+}
+
+.hud-icon {
+    font-size: 1.3em;
+}
+
+.hud-value {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.hud-label {
+    font-size: 0.85em;
+    color: var(--text-muted);
+    margin-left: auto;
+}
+
+/* ==========================================
+   Orders Panel
+   ========================================== */
+#orders-panel {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.order-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 15px;
+    min-width: 220px;
+    transition: all 0.3s ease;
+}
+
+.order-card:hover {
+    border-color: var(--accent-primary);
+}
+
+.order-customer {
+    font-weight: 600;
+    font-size: 0.95em;
+    margin-bottom: 8px;
+    color: var(--accent-secondary);
+}
+
+.order-items {
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.order-timer {
+    font-size: 0.8em;
+    color: var(--text-muted);
+}
+
+/* ==========================================
+   Crosshair
+   ========================================== */
+#crosshair {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 50;
+    display: none;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+/* ==========================================
+   Interaction Prompt
+   ========================================== */
+#interact-prompt {
+    position: fixed;
+    bottom: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-size: 0.95em;
+    display: none;
+    z-index: 50;
+    box-shadow: var(--shadow-sm);
+}
+
+#interact-prompt span {
+    background: var(--accent-primary);
+    padding: 3px 10px;
+    border-radius: 5px;
+    font-weight: 600;
+    margin: 0 5px;
+}
+
+/* ==========================================
+   Recipe Panel
+   ========================================== */
+#recipe-panel {
+    position: fixed;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    padding: 15px 25px;
+    border-radius: 16px;
+    z-index: 50;
+    max-width: 500px;
+    box-shadow: var(--shadow-md);
+}
+
+.recipe-title {
+    text-align: center;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--accent-secondary);
+    font-size: 1em;
+}
+
+.recipe-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85em;
+}
+
+.recipe-table th {
+    padding: 6px 10px;
+    text-align: left;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.recipe-table td {
+    padding: 6px 10px;
+    color: var(--text-secondary);
+}
+
+.recipe-table tr:hover td {
+    color: var(--text-primary);
+}
+
+.recipe-workflow {
+    margin-top: 12px;
+    font-size: 0.8em;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+/* ==========================================
+   Mini-Game Overlay
+   ========================================== */
+#minigame-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 80;
+    flex-direction: column;
+}
+
+.minigame-container {
+    background: var(--bg-medium);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    min-width: 400px;
+    box-shadow: var(--shadow-lg);
+}
+
+#minigame-title {
+    font-size: 1.8em;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+#minigame-instruction {
+    color: var(--text-secondary);
+    margin-bottom: 25px;
+}
+
+.minigame-escape-hint {
+    margin-top: 20px;
+    font-size: 0.85em;
+    color: var(--text-muted);
+}
+
+/* Timing Bar */
+#timing-bar {
+    position: relative;
+    width: 100%;
+    height: 40px;
+    background: var(--bg-light);
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+#timing-target {
+    position: absolute;
+    height: 100%;
+    background: linear-gradient(90deg, var(--success), #00f5a0);
+    opacity: 0.7;
+    border-radius: 20px;
+}
+
+#timing-marker {
+    position: absolute;
+    width: 6px;
+    height: 100%;
+    background: white;
+    border-radius: 3px;
+    box-shadow: 0 0 10px white;
+}
+
+/* Tap Meter */
+#tap-meter {
+    width: 100%;
+    height: 30px;
+    background: var(--bg-light);
+    border-radius: 15px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+#tap-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--info), #48cae4);
+    width: 0%;
+    transition: width 0.1s;
+    border-radius: 15px;
+}
+
+#tap-count {
+    font-size: 1.5em;
+    font-weight: 600;
+    color: var(--info);
+}
+
+/* ==========================================
+   Quality Popup
+   ========================================== */
+#quality-popup {
+    position: fixed;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3em;
+    font-weight: 700;
+    z-index: 85;
+    pointer-events: none;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+#quality-popup.show {
+    opacity: 1;
+    animation: popIn 0.5s ease forwards;
+}
+
+@keyframes popIn {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+.quality-perfect { color: #00ff88; text-shadow: 0 0 30px #00ff88; }
+.quality-good { color: #00d4ff; text-shadow: 0 0 30px #00d4ff; }
+.quality-ok { color: #ffcc00; text-shadow: 0 0 30px #ffcc00; }
+.quality-bad { color: #ff4444; text-shadow: 0 0 30px #ff4444; }
+
+/* ==========================================
+   Held Items Display
+   ========================================== */
+#held-items {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 15px;
+    z-index: 50;
+}
+
+.held-item {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 2px solid var(--accent-primary);
+    border-radius: 12px;
+    padding: 12px 20px;
+    font-size: 1.1em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: var(--shadow-sm);
+}
+
+.held-item-icon {
+    font-size: 1.4em;
+}
+
+/* ==========================================
+   Notification Toast
+   ========================================== */
+#notification {
+    position: fixed;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    padding: 15px 30px;
+    border-radius: 12px;
+    z-index: 90;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    text-align: center;
+    box-shadow: var(--shadow-md);
+}
+
+#notification.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.notification-title {
+    font-weight: 600;
+    font-size: 1.1em;
+    margin-bottom: 5px;
+}
+
+.notification-text {
+    font-size: 0.9em;
+    color: var(--text-secondary);
+}
+
+/* ==========================================
+   Music Panel
+   ========================================== */
+#music-panel {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 15px;
+    z-index: 50;
+    min-width: 180px;
+}
+
+.music-title {
+    font-size: 0.85em;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+}
+
+.music-tracks {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.music-track {
+    width: 35px;
+    height: 35px;
+    border-radius: 8px;
+    background: var(--bg-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1.1em;
+}
+
+.music-track:hover {
+    background: var(--bg-medium);
+    transform: scale(1.1);
+}
+
+.music-track.active {
+    background: var(--accent-primary);
+    box-shadow: 0 0 15px var(--accent-glow);
+}
+
+.volume-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.volume-control input[type="range"] {
+    flex: 1;
+    height: 4px;
+    -webkit-appearance: none;
+    background: var(--bg-light);
+    border-radius: 2px;
+    outline: none;
+}
+
+.volume-control input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    background: var(--accent-primary);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/* ==========================================
+   Shop Modal
+   ========================================== */
+#shop-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.shop-content {
+    background: var(--bg-medium);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 30px;
+    max-width: 800px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.shop-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.shop-title {
+    font-size: 1.8em;
+    font-weight: 600;
+}
+
+.shop-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 2em;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.shop-close:hover {
+    color: var(--error);
+}
+
+#shop-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 15px;
+}
+
+.shop-item {
+    background: var(--bg-light);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.shop-item:hover {
+    border-color: var(--accent-primary);
+    transform: translateY(-3px);
+}
+
+.shop-item.owned {
+    border-color: var(--success);
+    opacity: 0.7;
+}
+
+.shop-item-icon {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+.shop-item-name {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.shop-item-desc {
+    font-size: 0.85em;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+}
+
+.shop-item-price {
+    color: var(--accent-secondary);
+    font-weight: 600;
+}
+
+/* ==========================================
+   Pause Menu
+   ========================================== */
+#pause-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 90;
+}
+
+.pause-content {
+    text-align: center;
+}
+
+.pause-title {
+    font-size: 3em;
+    font-weight: 700;
+    margin-bottom: 30px;
+}
+
+.pause-btn {
+    display: block;
+    width: 200px;
+    margin: 15px auto;
+    padding: 15px 30px;
+    background: var(--bg-light);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pause-btn:hover {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+}
+
+/* ==========================================
+   Controls Help
+   ========================================== */
+.controls-help {
+    margin-top: 30px;
+    padding: 20px;
+    background: var(--bg-light);
+    border-radius: 12px;
+    text-align: left;
+}
+
+.controls-help h3 {
+    margin-bottom: 15px;
+    font-size: 1.1em;
+}
+
+.control-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 0.9em;
+}
+
+.control-key {
+    background: var(--bg-medium);
+    padding: 3px 10px;
+    border-radius: 5px;
+    font-family: monospace;
+}
+
+/* ==========================================
+   Scrollbar Styling
+   ========================================== */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--bg-light);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* ==========================================
+   Responsive Design
+   ========================================== */
+@media (max-width: 768px) {
+    .game-title {
+        font-size: 2.5em;
+    }
+    
+    .mode-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .mode-btn {
+        width: 100%;
+        max-width: 250px;
+    }
+    
+    #recipe-panel {
+        max-width: 95%;
+        font-size: 0.9em;
+    }
+    
+    .hud-panel {
+        padding: 15px;
+        min-width: 160px;
+    }
+}
